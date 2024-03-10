@@ -3,47 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Joust</title>
+    <title>Flying Bird Game</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            background-color: #87CEEB; /* Light blue background, feel free to change */
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            width: 100%; 
+            height: 100%; 
+            background-color: #87CEEB;
+        }
+        canvas { 
+            display: block; 
+            width: 100vw; 
+            height: 100vh; 
+        }
+        #startScreen { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.75); 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            flex-direction: column; 
+            text-align: center; 
             font-family: Futura, Arial, sans-serif;
         }
-        canvas {
-            display: none; /* Hide canvas initially */
-            width: 100vw;
-            height: 100vh;
-            background: url('path/to/sky.png') repeat-x;
-        }
-        #startupScreen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            padding: 20px;
-        }
-        #startBtn {
-            padding: 10px 20px;
-            font-size: 20px;
-            cursor: pointer;
-            margin-top: 20px;
+        #startScreen p {
+            max-width: 90%;
         }
     </style>
 </head>
 <body>
-    <div id="startupScreen">
-        <h2>Welcome to AI Joust, made by Maurice + GPT.</h2>
-        <p>Tap the screen on your mobile device, or the "Up" arrow on your keyboard to fly. Gobble up yogos. Don't get killed by the monsters. Good luck!</p>
-        <button id="startBtn">Start</button>
+    <div id="startScreen">
+        <p>Welcome to AI Joust, made by Maurice + GPT. Tap the screen on your mobile device, or the "Up" arrow on your keyboard to fly. Gobble up yogos. Don't get killed by the monsters. Good luck!</p>
+        <button onclick="startGame()" style="font-size: 20px; padding: 10px; cursor: pointer;">Start</button>
     </div>
     <canvas id="https://github.com/mauriceconti/Joust/blob/main/sky.png?raw=true"></canvas>
-    <script src="game.js"></script>
+    <script src="game.js"></script> <!-- Update with the correct path -->
 </body>
 </html>
