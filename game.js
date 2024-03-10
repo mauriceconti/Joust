@@ -1,157 +1,132 @@
 var canvas = document.getElementById("gameCanvas");
 var ctx = canvas.getContext("2d");
 
-// Adjust the canvas size for responsiveness
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas, false);
-resizeCanvas();
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 var score = 0;
-// Score display could be improved or integrated within the canvas for mobile compatibility
-var scoreText = document.createElement('div');
-scoreText.style.position = 'absolute';
-scoreText.style.color = 'white';
-scoreText.style.top = '20px';
-scoreText.style.left = '20px';
-scoreText.style.fontSize = '24px';
-scoreText.textContent = "Score: 0";
-document.body.appendChild(scoreText);
+var lives = 3;
+var gameSpeed = 1;
+var badGuys = [];
 
+// Load assets
 var birdImage = new Image();
-birdImage.src = 'https://github.com/mauriceconti/Joust/blob/main/bird.png?raw=true'; // Update URL
-
 var eggImage = new Image();
-eggImage.src = 'https://github.com/mauriceconti/Joust/blob/main/egg.png?raw=true'; // Update URL
-
+var badImage = new Image();
 var backgroundImage = new Image();
-backgroundImage.src = 'https://github.com/mauriceconti/Joust/blob/main/sky.png?raw=true'; // Update URL
+birdImage.src = 'path/to/bird.png'; // Update path
+eggImage.src = 'path/to/egg.png'; // Update path
+badImage.src = 'path/to/bad.png'; // Update path
+backgroundImage.src = 'path/to/sky.png'; // Update path
 
-var player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 }; // Adjusted for smaller size
+var player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 };
 var gravity = 0.25;
-var lift = -6;
+var lift = -5;
 var eggs = [];
 var eggFrequency = 2000;
+var badFrequency = 5000;
 var lastEggTime = 0;
+var lastBadTime = 0;
 
 var scrollSpeed = 0.5;
 var backgroundX = 0;
 
-function drawPlayer() {
-    ctx.drawImage(birdImage, player.x, player.y, player.width, player.height);
+// Responsive design and touch controls
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    player.y = canvas.height / 2;
 }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-function updateBackground() {
-    backgroundX -= scrollSpeed;
-    if (backgroundX <= -canvas.width) {
-        backgroundX = 0;
-    }
-}
+canvas.addEventListener('touchstart', function() { player.dy = lift; });
+document.addEventListener('keydown', function(event) {
+    if (event.key === "ArrowUp") { player.dy = lift; }
+});
 
 function drawBackground() {
+    backgroundX -= scrollSpeed * gameSpeed;
+    if (backgroundX <= -canvas.width) { backgroundX = 0; }
     ctx.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
     ctx.drawImage(backgroundImage, backgroundX + canvas.width, 0, canvas.width, canvas.height);
 }
 
+function drawPlayer() { ctx.drawImage(birdImage, player.x, player.y, player.width, player.height); }
+
 function createEgg() {
-    var now = Date.now();
-    if (now - lastEggTime > eggFrequency) {
+    if (Date.now() - lastEggTime > eggFrequency / gameSpeed) {
         var egg = { x: canvas.width, y: Math.random() * (canvas.height - 30), width: 30, height: 40 };
         eggs.push(egg);
-        lastEggTime = now;
+        lastEggTime = Date.now();
     }
 }
 
-function moveEggs() {
-    for (var i = eggs.length - 1; i >= 0; i--) {
-        eggs[i].x -= 2;
-        if (eggs[i].x + eggs[i].width < 0) {
-            eggs.splice(i, 1);
-        }
+function createBadGuy() {
+    if (Date.now() - lastBadTime > badFrequency / gameSpeed) {
+        var bad = { x: canvas.width, y: Math.random() * (canvas.height - 50), width: 50, height: 60 };
+        badGuys.push(bad);
+        lastBadTime = Date.now();
     }
 }
 
-function drawEggs() {
-    eggs.forEach(function(egg) {
-        ctx.drawImage(eggImage, egg.x, egg.y, egg.width, egg.height);
+function updateObjects(objects) {
+    objects.forEach(function(obj, index) {
+        obj.x -= (2 * gameSpeed);
+        if (obj.x + obj.width < 0) { objects.splice(index, 1); }
     });
 }
 
-function checkCollision() {
-    eggs.forEach(function(egg, index) {
-        if (player.x < egg.x + egg.width &&
-            player.x + player.width > egg.x &&
-            player.y < egg.y + egg.height &&
-            player.y + player.height > egg.y) {
-            score += 100;
-            scoreText.textContent = "Score: " + score;
-            eggs.splice(index, 1); // Remove the egg from the array
+function drawObjects(objects, image) {
+    objects.forEach(function(obj) { ctx.drawImage(image, obj.x, obj.y, obj.width, obj.height); });
+}
+
+function checkCollisions(objects) {
+    objects.forEach(function(obj, index) {
+        if (player.x < obj.x + obj.width && player.x + player.width > obj.x &&
+            player.y < obj.y + obj.height && player.y + player.height > obj.y) {
+            objects.splice(index, 1);
+            return true;
         }
     });
+    return false;
 }
 
-function updatePhysics() {
-    player.dy += gravity;
-    player.y += player.dy;
-
-    if (player.y + player.height > canvas.height) {
-        player.y = canvas.height - player.height;
-        player.dy = 0;
-    } else if (player.y < 0) {
-        player.y = 0;
-        player.dy = 0;
+function updateGame() {
+    if (checkCollisions(badGuys)) {
+        lives--;
+        if (lives <= 0) {
+            alert("Game Over!!");
+            document.location.reload();
+        }
+    }
+    if (checkCollisions(eggs)) {
+        score += 100;
+        if (score % 1000 === 0) { gameSpeed += 0.1; }
     }
 }
-document.addEventListener('keydown', function(event) {
-    if (event.key === "ArrowUp" || event.keyCode === 38) {
-        // Your flying logic here
-        console.log("Up arrow pressed.");
-    }
-});
 
-// Add touch event listeners for mobile controls
-function touchStart(e) {
-    player.dy = lift;
-    e.preventDefault(); // Prevent scrolling when touching the canvas
+function drawScore() {
+    ctx.font = "20px Futura";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText("Score: " + score + " Lives: " + lives, 10, 30);
 }
-
-canvas.addEventListener('touchstart', touchStart);
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
-    updateBackground();
     createEgg();
-    moveEggs();
-    drawEggs();
-    updatePhysics();
+    createBadGuy();
+    updateObjects(eggs);
+    updateObjects(badGuys);
+    drawObjects(eggs, eggImage);
+    drawObjects(badGuys, badImage);
     drawPlayer();
-    checkCollision();
+    updateGame();
+    drawScore();
+    player.dy += gravity;
+    player.y += player.dy;
     requestAnimationFrame(draw);
 }
 
-document.addEventListener('keydown', function(event) {
-    const key = event.key || event.keyCode;
-    if (key === "ArrowUp" || key === 38) {
-        event.preventDefault();
-        // Apply lift to the bird
-        player.dy = lift; // Ensure 'player' and 'lift' are accessible here
-        console.log("ArrowUp pressed");
-    }
-});
-
-
-// Wait for images to load
-let assetsLoaded = 0;
-function assetLoaded() {
-    assetsLoaded++;
-    if (assetsLoaded === 3) { // 3 assets: bird, egg, background
-        draw(); // Start the game loop when all assets are loaded
-    }
-}
-
-birdImage.onload = assetLoaded;
-eggImage.onload = assetLoaded;
-backgroundImage.onload = assetLoaded;
+birdImage.onload = draw; // Start the game once the bird image has loaded
