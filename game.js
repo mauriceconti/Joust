@@ -104,6 +104,12 @@ function updatePhysics() {
         player.dy = 0;
     }
 }
+document.addEventListener('keydown', function(event) {
+    if (event.key === "ArrowUp" || event.keyCode === 38) {
+        // Your flying logic here
+        console.log("Up arrow pressed.");
+    }
+});
 
 // Add touch event listeners for mobile controls
 function touchStart(e) {
