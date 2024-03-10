@@ -3,26 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flying Bird Game</title>
+    <title>AI Joust</title>
     <style>
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            width: 100%; 
-            height: 100%; 
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
             background-color: #87CEEB; /* Light blue background, feel free to change */
+            font-family: Futura, Arial, sans-serif;
         }
-        canvas { 
-            display: block; /* Prevents scrollbar */
-            background: url('https://github.com/mauriceconti/Joust/blob/main/sky.png?raw=true') repeat-x; /* Adjust path as needed */
-            width: 100vw; 
-            height: 100vh; 
+        canvas {
+            display: none; /* Hide canvas initially */
+            width: 100vw;
+            height: 100vh;
+            background: url('path/to/sky.png') repeat-x;
+        }
+        #startupScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        #startBtn {
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <script src="game.js"></script> <!-- Update with the path to your game.js file -->
+    <div id="startupScreen">
+        <h2>Welcome to AI Joust, made by Maurice + GPT.</h2>
+        <p>Tap the screen on your mobile device, or the "Up" arrow on your keyboard to fly. Gobble up yogos. Don't get killed by the monsters. Good luck!</p>
+        <button id="startBtn">Start</button>
+    </div>
+    <canvas id="https://github.com/mauriceconti/Joust/blob/main/sky.png?raw=true"></canvas>
+    <script src="game.js"></script>
 </body>
 </html>
