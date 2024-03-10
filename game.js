@@ -21,13 +21,13 @@ scoreText.textContent = "Score: 0";
 document.body.appendChild(scoreText);
 
 var birdImage = new Image();
-birdImage.src = 'https://github.com/<GitHub-User>/<Repository-Name>/raw/main/bird.png'; // Update URL
+birdImage.src = 'https://github.com/mauriceconti/Joust/blob/main/bird.png?raw=true'; // Update URL
 
 var eggImage = new Image();
-eggImage.src = 'https://github.com/<GitHub-User>/<Repository-Name>/raw/main/egg.png'; // Update URL
+eggImage.src = 'https://github.com/mauriceconti/Joust/blob/main/egg.png?raw=true'; // Update URL
 
 var backgroundImage = new Image();
-backgroundImage.src = 'https://github.com/<GitHub-User>/<Repository-Name>/raw/main/sky.png'; // Update URL
+backgroundImage.src = 'https://github.com/mauriceconti/Joust/blob/main/sky.png?raw=true'; // Update URL
 
 var player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 }; // Adjusted for smaller size
 var gravity = 0.25;
