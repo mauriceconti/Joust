@@ -132,6 +132,17 @@ function draw() {
     requestAnimationFrame(draw);
 }
 
+document.addEventListener('keydown', function(event) {
+    const key = event.key || event.keyCode;
+    if (key === "ArrowUp" || key === 38) {
+        event.preventDefault();
+        // Apply lift to the bird
+        player.dy = lift; // Ensure 'player' and 'lift' are accessible here
+        console.log("ArrowUp pressed");
+    }
+});
+
+
 // Wait for images to load
 let assetsLoaded = 0;
 function assetLoaded() {
