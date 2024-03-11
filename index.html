@@ -11,24 +11,28 @@
             overflow: hidden;
             width: 100%;
             height: 100%;
-            background-color: #87CEEB; /* Feel free to change this */
+            background-color: #87CEEB;
         }
         #startScreen {
             position: absolute;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7); /* Dark overlay */
+            background: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             color: white;
-            font-family: 'Futura', sans-serif; /* Make sure this font is available or change it */
+            font-family: 'Futura', sans-serif;
+        }
+        #startScreen img {
+            max-width: 100px; /* Adjust size as needed */
+            margin-bottom: 20px;
         }
         #startScreen p {
             text-align: center;
-            max-width: 90%;
-            margin-bottom: 20px;
+            max-width: 600px;
+            margin: 10px 20px;
         }
         #startScreen button {
             font-size: 24px;
@@ -38,14 +42,16 @@
             border: none;
             border-radius: 5px;
             color: #333;
+            margin-top: 20px;
         }
         canvas {
-            display: block; /* Prevents scrollbar */
+            display: block;
         }
     </style>
 </head>
 <body>
     <div id="startScreen">
+        <img src="https://mauriceconti.github.io/Joust/bird.png" alt="Bird">
         <p>Welcome to AI Joust, made by Maurice + GPT.</p>
         <p>Tap the screen on your mobile device, or press the "Up" arrow on your keyboard to fly.</p>
         <p>Gobble up yogos. Don't get killed by the monsters. Good luck!</p>
