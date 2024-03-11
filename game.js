@@ -1,164 +1,130 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    let score = 0;
-    let lives = 3;
-    let gameSpeed = 1;
-    const eggs = [];
-    const badGuys = [];
-    let lastEggTime = Date.now();
-    let lastBadTime = Date.now();
-    let backgroundX = 0;
-
-    const birdImage = new Image();
-    const eggImage = new Image();
-    const badImage = new Image();
-    const backgroundImage = new Image();
-
-    birdImage.onload = () => {
-        startGame();
-    };
-    birdImage.src = 'bird.png';
-    eggImage.src = 'egg.png';
-    badImage.src = 'bad.png';
-    backgroundImage.src = 'sky.png';
-
-    const player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 };
-    const gravity = 0.25;
-    const lift = -5;
-
-    window.addEventListener('resize', resizeCanvas);
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+class WelcomeScreen extends Phaser.Scene {
+    constructor() {
+        super({ key: 'WelcomeScreen' });
     }
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "ArrowUp") player.dy = lift;
-    });
-
-    canvas.addEventListener('touchstart', () => {
-        player.dy = lift;
-    });
-
-    function startGame() {
-        requestAnimationFrame(gameLoop);
+    preload() {
+        this.load.image('startButton', 'https://github.com/mauriceconti/Joust/raw/main/startButton.png'); // Placeholder, replace with actual path
     }
 
-    function gameLoop(timestamp) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBackground();
-        updatePlayer();
-        handleEggs();
-        handleBadGuys();
-        drawScoreAndLives();
+    create() {
+        const welcomeText = "Welcome to Yoga Joust!\n\nA game made by Maurice and a GPT\n\nGobble up the Yolos. Don’t touch the couches!\n\nGood Luck!";
+        this.add.text(100, 100, welcomeText, { fontSize: '20px', fill: '#fff', align: 'center' });
 
-        if (score % 1000 === 0 && score !== 0) {
-            gameSpeed += 0.01;
-        }
-
-        requestAnimationFrame(gameLoop);
-    }
-
-    function updatePlayer() {
-        player.dy += gravity;
-        player.y += player.dy;
-        if (player.y > canvas.height - player.height) {
-            player.y = canvas.height - player.height;
-            player.dy = 0;
-        } else if (player.y < 0) {
-            player.y = 0;
-            player.dy = 0;
-        }
-        ctx.drawImage(birdImage, player.x, player.y, player.width, player.height);
-    }
-
-    function handleEggs() {
-        if (Date.now() - lastEggTime > 2000 / gameSpeed && eggs.length < 1) {
-            eggs.push({ x: canvas.width, y: Math.random() * (canvas.height - 50), width: 50, height: 50 });
-            lastEggTime = Date.now();
-        }
-        eggs.forEach((egg, index) => {
-            egg.x -= 2 * gameSpeed;
-            if (egg.x + egg.width < 0) {
-                eggs.splice(index, 1);
-            }
-            ctx.drawImage(eggImage, egg.x, egg.y, egg.width, egg.height);
-            checkCollision(egg, index);
+        const startButton = this.add.image(400, 300, 'startButton').setInteractive();
+        startButton.on('pointerdown', () => {
+            this.scene.start('MainGame');
         });
     }
+}
 
-    function handleBadGuys() {
-        if (Date.now() - lastBadTime > 4000 / gameSpeed && badGuys.length < 1) {
-            badGuys.push({ x: canvas.width, y: Math.random() * (canvas.height - 60), width: 60, height: 60 });
-            lastBadTime = Date.now();
-        }
-        badGuys.forEach((bad, index) => {
-            bad.x -= 3 * gameSpeed;
-            if (bad.x + bad.width < 0) {
-                badGuys.splice(index, 1);
-            }
-            ctx.drawImage(badImage, bad.x, bad.y, bad.width, bad.height);
-            checkCollision(bad, index);
+class MainGame extends Phaser.Scene {
+    constructor() {
+        super({ key: 'MainGame' });
+    }
+
+    preload() {
+        this.load.image('sky', 'https://github.com/mauriceconti/Joust/raw/main/sky.png');
+        this.load.image('bird', 'https://github.com/mauriceconti/Joust/raw/main/bird.png');
+        this.load.image('egg1', 'https://github.com/mauriceconti/Joust/raw/main/egg.png'); // Assume egg.png is egg1
+        this.load.image('egg2', 'YOUR_PATH_FOR_EGG2'); // Placeholder, replace with actual path
+        this.load.image('egg3', 'YOUR_PATH_FOR_EGG3'); // Placeholder, replace with actual path
+        this.load.image('bad', 'https://github.com/mauriceconti/Joust/raw/main/bad.png');
+    }
+
+    create() {
+        // Game setup code here (similar to previous `create` function)
+        // Background
+        this.add.image(400, 300, 'sky');
+
+        // Player
+        player = this.physics.add.sprite(100, 450, 'bird');
+        player.setBounce(0.2);
+        player.setCollideWorldBounds(true);
+
+        // Score & Lives
+        scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
+        livesText = this.add.text(650, 16, 'Lives: 3', { fontSize: '32px', fill: '#000' });
+
+        // Controls
+        cursors = this.input.keyboard.createCursorKeys();
+
+        // Generate eggs with specified ratios
+        this.generateEggs();
+
+        // Generate bads
+        bads = this.physics.add.group({
+            key: 'bad',
+            repeat: 2,
+            setXY: { x: 12, y: 0, stepX: 150 }
         });
+
+        // Colliders and Overlaps
+        this.physics.add.collider(player, eggs, collectEgg, null, this);
+        this.physics.add.collider(player, bads, hitBad, null, this);
     }
 
-    function checkCollision(object, index) {
-        if (player.x < object.x + object.width && player.x + player.width > object.x &&
-            player.y < object.y + object.height && player.y + player.height > object.y) {
-            if (eggs.includes(object)) {
-                score += 100;
-                eggs.splice(index, 1);
-            } else if (badGuys.includes(object)) {
-                lives -= 1;
-                badGuys.splice(index, 1);
-                if (lives === 0) {
-                    gameOver();
-                } else {
-                    loseLife();
-                }
+    update() {
+        // Update logic here (similar to previous `update` function)
+        if (gameOver) {
+            this.scene.start('WelcomeScreen');
+        }
+    }
+
+    generateEggs() {
+        eggs = this.physics.add.group();
+        const totalEggs = 20; // Total eggs to spawn
+        for (let i = 0; i < totalEggs; i++) {
+            const x = Phaser.Math.Between(0, 800);
+            const y = Phaser.Math.Between(0, 600);
+            let eggType = 'egg1'; // Default egg type
+            const rand = Math.random();
+            if (rand < 0.1) {
+                eggType = 'egg3'; // 10% chance
+            } else if (rand < 0.3) {
+                eggType = 'egg2'; // 20% chance
             }
+            eggs.create(x, y, eggType);
         }
     }
+}
 
-    function loseLife() {
-        flashScreen("red", 300);
-        player.y = canvas.height / 2;
-        player.dy = 0;
-    }
-
-    function gameOver() {
-        flashScreen("red", 3000);
-        setTimeout(() => {
-            alert("Game Over!!");
-            document.location.reload();
-        }, 3000);
-    }
-
-    function flashScreen(color, duration) {
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        setTimeout(() => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }, duration);
-    }
-
-    function drawBackground() {
-        ctx.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
-        ctx.drawImage(backgroundImage, backgroundX + canvas.width, 0, canvas.width, canvas.height);
-        backgroundX -= 1 * gameSpeed;
-        if (backgroundX <= -canvas.width) {
-            backgroundX = 0;
+// Game configuration with scenes
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
         }
-    }
+    },
+    scene: [WelcomeScreen, MainGame]
+};
 
-    function drawScoreAndLives() {
-        ctx.font = "20px Futura";
-        ctx.fillStyle = "white";
-        ctx.fillText(`Score: ${score}`, 10, 30);
-        ctx.fillText(`Lives: ${lives}`, 10, 60);
+const game = new Phaser.Game(config);
+
+function collectEgg(player, egg) {
+    egg.disableBody(true, true);
+    let scoreIncrement = 100;
+    if (egg.texture.key === 'egg2') {
+        scoreIncrement = 200; // Assuming egg2 is worth 200 points
+    } else if (egg.texture.key === 'egg3') {
+        scoreIncrement = 500;
     }
-});
+    score += scoreIncrement;
+    scoreText.setText('Score: ' + score);
+}
+
+function hitBad(player, bad) {
+    bad.disableBody(true, true);
+    lives -= 1;
+    livesText.setText('Lives: ' + lives);
+
+    if (lives <= 0) {
+        gameOver = true;
+        // Add game over logic or message here
+    }
+}
