@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function startGame() {
-        document.getElementById('startScreen').style.display = 'none';
         requestAnimationFrame(gameLoop);
     }
 
