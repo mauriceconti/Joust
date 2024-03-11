@@ -22,16 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     badImage.src = 'https://mauriceconti.github.io/Joust/bad.png';
     backgroundImage.src = 'https://mauriceconti.github.io/Joust/sky.png';
 
-    const player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45, update: function() {
-        this.dy += gravity;
-        this.y += this.dy;
-        if (this.y > canvas.height - this.height || this.y < 0) {
-            this.dy = 0;
-            this.y = canvas.height / 2;
-        }
-    }, draw: function() {
-        ctx.drawImage(birdImage, this.x, this.y, this.width, this.height);
-    }};
+    const player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 };
     const gravity = 0.25;
     const lift = -5;
 
@@ -51,86 +42,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startGame() {
         document.getElementById('startScreen').style.display = 'none';
-        gameLoop();
+        requestAnimationFrame(gameLoop);
     }
 
     function gameLoop(timestamp) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBackground();
-        player.update();
-        player.draw();
-
+        updatePlayer();
         handleEggs();
         handleBadGuys();
         drawScoreAndLives();
 
         if (score % 1000 === 0 && score !== 0) {
-            gameSpeed += 0.03;
-            adjustGameDifficulty();
+            gameSpeed += 0.1;
         }
 
         requestAnimationFrame(gameLoop);
     }
 
+    function updatePlayer() {
+        player.dy += gravity;
+        player.y += player.dy;
+        if (player.y > canvas.height - player.height) {
+            player.y = canvas.height - player.height;
+            player.dy = 0;
+        } else if (player.y < 0) {
+            player.y = 0;
+            player.dy = 0;
+        }
+        ctx.drawImage(birdImage, player.x, player.y, player.width, player.height);
+    }
+
     function handleEggs() {
         if (Date.now() - lastEggTime > 2000 / gameSpeed && eggs.length < 12) {
-            createEgg();
+            eggs.push({ x: canvas.width, y: Math.random() * (canvas.height - 50), width: 50, height: 50 });
             lastEggTime = Date.now();
         }
-        updateAndDrawObjects(eggs, eggImage);
+        eggs.forEach((egg, index) => {
+            egg.x -= 2 * gameSpeed;
+            if (egg.x + egg.width < 0) {
+                eggs.splice(index, 1);
+            }
+            ctx.drawImage(eggImage, egg.x, egg.y, egg.width, egg.height);
+            checkCollision(egg, index);
+        });
     }
 
     function handleBadGuys() {
         if (Date.now() - lastBadTime > 8000 / gameSpeed && badGuys.length < eggs.length / 4) {
-            createBadGuy();
+            badGuys.push({ x: canvas.width, y: Math.random() * (canvas.height - 60), width: 60, height: 60 });
             lastBadTime = Date.now();
         }
-        updateAndDrawObjects(badGuys, badImage);
-    }
-
-    function createEgg() {
-        // Logic to ensure no vertical overlap and limit on-screen eggs
-        let positionY;
-        do {
-            positionY = Math.random() * (canvas.height - 50);
-        } while (eggs.some(egg => Math.abs(egg.y - positionY) < eggImage.height));
-        
-        eggs.push({ x: canvas.width, y: positionY, width: 50, height: 50 });
-    }
-
-    function createBadGuy() {
-        badGuys.push({ x: canvas.width, y: Math.random() * (canvas.height - 60), width: 60, height: 60 });
-    }
-
-    function updateAndDrawObjects(objects, image) {
-        objects.forEach((object, index) => {
-            object.x -= 2 * gameSpeed;
-            if (object.x + object.width < 0) {
-                objects.splice(index, 1);
+        badGuys.forEach((bad, index) => {
+            bad.x -= 3 * gameSpeed;
+            if (bad.x + bad.width < 0) {
+                badGuys.splice(index, 1);
             }
-            ctx.drawImage(image, object.x, object.y, object.width, object.height);
-            checkCollision(object, index);
+            ctx.drawImage(badImage, bad.x, bad.y, bad.width, bad.height);
+            checkCollision(bad, index);
         });
     }
 
     function checkCollision(object, index) {
         if (player.x < object.x + object.width && player.x + player.width > object.x &&
             player.y < object.y + object.height && player.y + player.height > object.y) {
-            // Handle collision based on object type
-            handleCollisionWithPlayer(object, index);
-        }
-    }
-
-    function handleCollisionWithPlayer(object, index) {
-        if (eggs.includes(object)) {
-            score += 100;
-            eggs.splice(index, 1);
-        } else if (badGuys.includes(object)) {
-            lives -= 1;
-            badGuys.splice(index, 1);
-            if (lives === 0) {
-                alert("Game Over!!");
-                document.location.reload();
+            if (eggs.includes(object)) {
+                score += 100;
+                eggs.splice(index, 1);
+            } else if (badGuys.includes(object)) {
+                lives -= 1;
+                badGuys.splice(index, 1);
+                if (lives === 0) {
+                    alert("Game Over!!");
+                    document.location.reload();
+                }
             }
         }
     }
@@ -143,10 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.font = "16px Futura";
         ctx.fillStyle = "white";
         ctx.fillText(`Score: ${score} | Lives: ${lives}`, 10, 20);
-    }
-
-    function adjustGameDifficulty() {
-        // Adjust difficulty, if needed, based on score or other game events
     }
 
     window.startGame = startGame;
