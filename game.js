@@ -4,14 +4,14 @@ class WelcomeScreen extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('startButton', 'https://github.com/mauriceconti/Joust/raw/main/startButton.png'); // Placeholder, replace with actual path
+        this.load.image('startButton', 'https://github.com/mauriceconti/Joust/blob/main/start.png'); // Placeholder, replace with actual path
     }
 
     create() {
         const welcomeText = "Welcome to Yoga Joust!\n\nA game made by Maurice and a GPT\n\nGobble up the Yolos. Don’t touch the couches!\n\nGood Luck!";
         this.add.text(100, 100, welcomeText, { fontSize: '20px', fill: '#fff', align: 'center' });
 
-        const startButton = this.add.image(400, 300, 'startButton').setInteractive();
+        const startButton = this.add.image(400, 300, 'start').setInteractive();
         startButton.on('pointerdown', () => {
             this.scene.start('MainGame');
         });
@@ -24,12 +24,12 @@ class MainGame extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('sky', 'https://github.com/mauriceconti/Joust/raw/main/sky.png');
-        this.load.image('bird', 'https://github.com/mauriceconti/Joust/raw/main/bird.png');
-        this.load.image('egg1', 'https://github.com/mauriceconti/Joust/raw/main/egg.png'); // Assume egg.png is egg1
-        this.load.image('egg2', 'YOUR_PATH_FOR_EGG2'); // Placeholder, replace with actual path
-        this.load.image('egg3', 'YOUR_PATH_FOR_EGG3'); // Placeholder, replace with actual path
-        this.load.image('bad', 'https://github.com/mauriceconti/Joust/raw/main/bad.png');
+        this.load.image('sky', 'https://github.com/mauriceconti/Joust/blob/main/sky.png');
+        this.load.image('bird', 'https://github.com/mauriceconti/Joust/blob/main/bird.png');
+        this.load.image('egg1', 'https://github.com/mauriceconti/Joust/blob/main/egg.png'); // Assume egg.png is egg1
+        this.load.image('egg2', 'https://github.com/mauriceconti/Joust/blob/main/egg2.png'); // Placeholder, replace with actual path
+        this.load.image('egg3', 'https://github.com/mauriceconti/Joust/blob/main/egg3.png'); // Placeholder, replace with actual path
+        this.load.image('bad', 'https://github.com/mauriceconti/Joust/blob/main/bad.png');
     }
 
     create() {
