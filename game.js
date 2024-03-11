@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameSpeed = 1;
     const eggs = [];
     const badGuys = [];
-    let lastEggTime = 0;
-    let lastBadTime = 0;
+    let lastEggTime = Date.now();
+    let lastBadTime = Date.now();
 
     const birdImage = new Image();
     const eggImage = new Image();
@@ -22,7 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
     badImage.src = 'https://mauriceconti.github.io/Joust/bad.png';
     backgroundImage.src = 'https://mauriceconti.github.io/Joust/sky.png';
 
-    const player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 };
+    const player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45, update: function() {
+        this.dy += gravity;
+        this.y += this.dy;
+        if (this.y > canvas.height - this.height || this.y < 0) {
+            this.dy = 0;
+            this.y = canvas.height / 2;
+        }
+    }, draw: function() {
+        ctx.drawImage(birdImage, this.x, this.y, this.width, this.height);
+    }};
     const gravity = 0.25;
     const lift = -5;
 
@@ -42,68 +51,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startGame() {
         document.getElementById('startScreen').style.display = 'none';
-        requestAnimationFrame(gameLoop);
+        gameLoop();
     }
 
-    function gameLoop() {
+    function gameLoop(timestamp) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBackground();
-        updatePlayer();
+        player.update();
+        player.draw();
+
         handleEggs();
         handleBadGuys();
         drawScoreAndLives();
+
+        if (score % 1000 === 0 && score !== 0) {
+            gameSpeed += 0.03;
+            adjustGameDifficulty();
+        }
+
         requestAnimationFrame(gameLoop);
     }
 
-    function updatePlayer() {
-        player.dy += gravity;
-        player.y += player.dy;
-        if (player.y > canvas.height - player.height) {
-            player.y = canvas.height - player.height;
-            player.dy = 0;
-        } else if (player.y < 0) {
-            player.y = 0;
-            player.dy = 0;
-        }
-        ctx.drawImage(birdImage, player.x, player.y, player.width, player.height);
-    }
-
-    function canSpawnEgg() {
-        const eggHeight = 50; // Adjust based on your egg image
-        return eggs.filter(egg => egg.x > canvas.width - egg.width).length < 1 &&
-               eggs.length < 12;
-    }
-
     function handleEggs() {
-        if (Date.now() - lastEggTime > 2000 / gameSpeed && canSpawnEgg()) {
-            eggs.push({ x: canvas.width, y: Math.random() * (canvas.height - eggHeight), width: 50, height: 50 });
+        if (Date.now() - lastEggTime > 2000 / gameSpeed && eggs.length < 12) {
+            createEgg();
             lastEggTime = Date.now();
         }
-        eggs.forEach((egg, index) => {
-            egg.x -= 2 * gameSpeed;
-            if (egg.x + egg.width < 0) {
-                eggs.splice(index, 1);
-            }
-            ctx.drawImage(eggImage, egg.x, egg.y, egg.width, egg.height);
-        });
-    }
-
-    function canSpawnBadGuy() {
-        return badGuys.length < eggs.length / 4;
+        updateAndDrawObjects(eggs, eggImage);
     }
 
     function handleBadGuys() {
-        if (Date.now() - lastBadTime > 5000 / gameSpeed && canSpawnBadGuy()) {
-            badGuys.push({ x: canvas.width, y: Math.random() * (canvas.height - badHeight), width: 60, height: 60 });
+        if (Date.now() - lastBadTime > 8000 / gameSpeed && badGuys.length < eggs.length / 4) {
+            createBadGuy();
             lastBadTime = Date.now();
         }
-        badGuys.forEach((bad, index) => {
-            bad.x -= 3 * gameSpeed;
-            if (bad.x + bad.width < 0) {
-                badGuys.splice(index, 1);
+        updateAndDrawObjects(badGuys, badImage);
+    }
+
+    function createEgg() {
+        // Logic to ensure no vertical overlap and limit on-screen eggs
+        let positionY;
+        do {
+            positionY = Math.random() * (canvas.height - 50);
+        } while (eggs.some(egg => Math.abs(egg.y - positionY) < eggImage.height));
+        
+        eggs.push({ x: canvas.width, y: positionY, width: 50, height: 50 });
+    }
+
+    function createBadGuy() {
+        badGuys.push({ x: canvas.width, y: Math.random() * (canvas.height - 60), width: 60, height: 60 });
+    }
+
+    function updateAndDrawObjects(objects, image) {
+        objects.forEach((object, index) => {
+            object.x -= 2 * gameSpeed;
+            if (object.x + object.width < 0) {
+                objects.splice(index, 1);
             }
-            ctx.drawImage(badImage, bad.x, bad.y, bad.width, bad.height);
+            ctx.drawImage(image, object.x, object.y, object.width, object.height);
+            checkCollision(object, index);
         });
+    }
+
+    function checkCollision(object, index) {
+        if (player.x < object.x + object.width && player.x + player.width > object.x &&
+            player.y < object.y + object.height && player.y + player.height > object.y) {
+            // Handle collision based on object type
+            handleCollisionWithPlayer(object, index);
+        }
+    }
+
+    function handleCollisionWithPlayer(object, index) {
+        if (eggs.includes(object)) {
+            score += 100;
+            eggs.splice(index, 1);
+        } else if (badGuys.includes(object)) {
+            lives -= 1;
+            badGuys.splice(index, 1);
+            if (lives === 0) {
+                alert("Game Over!!");
+                document.location.reload();
+            }
+        }
     }
 
     function drawBackground() {
@@ -111,10 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function drawScoreAndLives() {
-        ctx.font = "20px Futura";
+        ctx.font = "16px Futura";
         ctx.fillStyle = "white";
-        ctx.fillText(`Score: ${score} Lives: ${lives}`, 10, 30);
+        ctx.fillText(`Score: ${score} | Lives: ${lives}`, 10, 20);
     }
 
-    window.startGame = startGame; // Make the startGame function globally accessible
+    function adjustGameDifficulty() {
+        // Adjust difficulty, if needed, based on score or other game events
+    }
+
+    window.startGame = startGame;
 });
