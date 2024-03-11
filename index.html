@@ -21,6 +21,7 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            z-index: 1; /* Ensure the welcome screen is behind the canvas */
         }
         #startScreen img {
             width: 100px;
@@ -31,7 +32,7 @@
             color: white;
             font-size: 20px;
             text-align: center;
-            font-family:Futura, sans-serif;
+            font-family: Futura, sans-serif;
         }
         #startScreen button {
             padding: 10px 20px;
@@ -41,13 +42,19 @@
             border: none;
             cursor: pointer;
         }
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2; /* Ensure the canvas is above the welcome screen */
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="startScreen">
         <img src="bird.png" alt="bird">
-        <p>Welcome to AI Joust, madeth by Maurice + GPT.<br>Tap the screen on your mobile device, or the "Up" arrow on your keyboard to fly.<br>Gobble up yogos. Don't get killed by the monsters. Good luck!</p>
+        <p>Welcome to AI Joust, made by Maurice + GPT.<br>Tap the screen on your mobile device, or the "Up" arrow on your keyboard to fly.<br>Gobble up yogos. Don't get killed by the monsters. Good luck!</p>
         <button onclick="startGame()">Start</button>
     </div>
     <script src="game.js"></script>
