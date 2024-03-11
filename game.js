@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const badGuys = [];
     let lastEggTime = Date.now();
     let lastBadTime = Date.now();
+    let backgroundX = 0;
 
     const birdImage = new Image();
     const eggImage = new Image();
@@ -20,10 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     birdImage.onload = () => {
         startGame();
     };
-    birdImage.src = 'https://mauriceconti.github.io/Joust/bird.png';
-    eggImage.src = 'https://mauriceconti.github.io/Joust/egg.png';
-    badImage.src = 'https://mauriceconti.github.io/Joust/bad.png';
-    backgroundImage.src = 'https://mauriceconti.github.io/Joust/sky.png';
+    birdImage.src = 'bird.png';
+    eggImage.src = 'egg.png';
+    badImage.src = 'bad.png';
+    backgroundImage.src = 'sky.png';
 
     const player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 };
     const gravity = 0.25;
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         drawScoreAndLives();
 
         if (score % 1000 === 0 && score !== 0) {
-            gameSpeed += 0.1;
+            gameSpeed += 0.01;
         }
 
         requestAnimationFrame(gameLoop);
@@ -76,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleEggs() {
-        if (Date.now() - lastEggTime > 2000 / gameSpeed && eggs.length < 12) {
+        if (Date.now() - lastEggTime > 2000 / gameSpeed && eggs.length < 1) {
             eggs.push({ x: canvas.width, y: Math.random() * (canvas.height - 50), width: 50, height: 50 });
             lastEggTime = Date.now();
         }
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleBadGuys() {
-        if (Date.now() - lastBadTime > 8000 / gameSpeed && badGuys.length < eggs.length / 4) {
+        if (Date.now() - lastBadTime > 4000 / gameSpeed && badGuys.length < 1) {
             badGuys.push({ x: canvas.width, y: Math.random() * (canvas.height - 60), width: 60, height: 60 });
             lastBadTime = Date.now();
         }
@@ -124,21 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loseLife() {
-        // Flash the screen red
         flashScreen("red", 300);
-
-        // Reset player position
         player.y = canvas.height / 2;
-
-        // Restart the game loop
-        requestAnimationFrame(gameLoop);
+        player.dy = 0;
     }
 
     function gameOver() {
-        // Flash the screen red for 3 seconds
         flashScreen("red", 3000);
-
-        // Show "Game Over" message after 3 seconds
         setTimeout(() => {
             alert("Game Over!!");
             document.location.reload();
@@ -154,12 +147,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function drawBackground() {
-        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
+        ctx.drawImage(backgroundImage, backgroundX + canvas.width, 0, canvas.width, canvas.height);
+        backgroundX -= 1 * gameSpeed;
+        if (backgroundX <= -canvas.width) {
+            backgroundX = 0;
+        }
     }
 
     function drawScoreAndLives() {
-        ctx.font = "16px Futura";
+        ctx.font = "20px Futura";
         ctx.fillStyle = "white";
-        ctx.fillText(`Score: ${score} | Lives: ${lives}`, 10, 20);
+        ctx.fillText(`Score: ${score}`, 10, 30);
+        ctx.fillText(`Lives: ${lives}`, 10, 60);
     }
 });
