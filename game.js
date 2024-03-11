@@ -124,13 +124,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function loseLife() {
         // Flash the screen red
         flashScreen("red", 300);
-
-        // Reset player position
+        
+        // Pause for 2 seconds
+    setTimeout(() => {
+        
+            // Reset player position
         player.y = canvas.height / 2;
 
-        // Restart the game loop
+            // Reset game speed
+    gameSpeed = 1; // Reset game speed to its initial value
+        
+            // Restart the game loop
         requestAnimationFrame(gameLoop);
-    }
+    }, 2000); // Pause for 2 seconds (2000 milliseconds)
 
     function gameOver() {
         // Flash the screen red for 3 seconds
