@@ -4,16 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yoga Joust</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        #gameCanvas {
+            display: none; /* Hidden initially */
+            background-color: #87CEEB; /* Light blue background, similar to a sky */
+        }
+        #welcomeScreen {
+            text-align: center;
+        }
+        #message {
+            margin-top: 20px;
+            color: red;
+            font-size: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <div id="welcomeScreen">
-            <p>Welcome to Yoga Joust!<br>A game made by Maurice and a GPT<br>Gobble up the Yolos. Don’t touch the couches!<br>Good Luck!</p>
-            <button id="startButton">Start</button>
-        </div>
-        <canvas id="gameCanvas"></canvas>
+    <div id="welcomeScreen">
+        <p>Welcome to Yoga Joust!<br>
+        A game made by Maurice and a GPT<br>
+        Gobble up the Yolos. Don’t touch the couches!<br>
+        Good Luck!</p>
+        <button id="startButton">Start</button>
     </div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="message"></div>
     <script src="game.js"></script>
 </body>
 </html>
