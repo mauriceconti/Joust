@@ -1,130 +1,137 @@
-class WelcomeScreen extends Phaser.Scene {
-    constructor() {
-        super({ key: 'WelcomeScreen' });
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 600;
+
+    let player = { x: 100, y: 200, width: 40, height: 40, speed: 5, dy: 0 };
+    let gravity = 0.25;
+    let lift = -6;
+    let eggs = [];
+    let bads = [];
+    let score = 0;
+    let lives = 3;
+    let gameRunning = false;
+    const eggTypes = [{ type: 'egg1', points: 100 }, { type: 'egg2', points: 200 }, { type: 'egg3', points: 500 }];
+    let messageTimeout = null;
+
+    function startGame() {
+        document.getElementById('welcomeScreen').style.display = 'none';
+        canvas.style.display = 'block';
+        gameRunning = true;
+        resetGame();
+        gameLoop();
     }
 
-    preload() {
-        this.load.image('startButton', 'https://github.com/mauriceconti/Joust/blob/main/start.png'); // Placeholder, replace with actual path
+    function resetGame() {
+        eggs = [];
+        bads = [];
+        score = 0;
+        lives = 3;
+        player.y = canvas.height / 2;
+        player.dy = 0;
+        spawnItems();
     }
 
-    create() {
-        const welcomeText = "Welcome to Yoga Joust!\n\nA game made by Maurice and a GPT\n\nGobble up the Yolos. Don’t touch the couches!\n\nGood Luck!";
-        this.add.text(100, 100, welcomeText, { fontSize: '20px', fill: '#fff', align: 'center' });
-
-        const startButton = this.add.image(400, 300, 'start').setInteractive();
-        startButton.on('pointerdown', () => {
-            this.scene.start('MainGame');
-        });
-    }
-}
-
-class MainGame extends Phaser.Scene {
-    constructor() {
-        super({ key: 'MainGame' });
-    }
-
-    preload() {
-        this.load.image('sky', 'https://github.com/mauriceconti/Joust/blob/main/sky.png');
-        this.load.image('bird', 'https://github.com/mauriceconti/Joust/blob/main/bird.png');
-        this.load.image('egg1', 'https://github.com/mauriceconti/Joust/blob/main/egg.png'); // Assume egg.png is egg1
-        this.load.image('egg2', 'https://github.com/mauriceconti/Joust/blob/main/egg2.png'); // Placeholder, replace with actual path
-        this.load.image('egg3', 'https://github.com/mauriceconti/Joust/blob/main/egg3.png'); // Placeholder, replace with actual path
-        this.load.image('bad', 'https://github.com/mauriceconti/Joust/blob/main/bad.png');
-    }
-
-    create() {
-        // Game setup code here (similar to previous `create` function)
-        // Background
-        this.add.image(400, 300, 'sky');
-
-        // Player
-        player = this.physics.add.sprite(100, 450, 'bird');
-        player.setBounce(0.2);
-        player.setCollideWorldBounds(true);
-
-        // Score & Lives
-        scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
-        livesText = this.add.text(650, 16, 'Lives: 3', { fontSize: '32px', fill: '#000' });
-
-        // Controls
-        cursors = this.input.keyboard.createCursorKeys();
-
-        // Generate eggs with specified ratios
-        this.generateEggs();
-
-        // Generate bads
-        bads = this.physics.add.group({
-            key: 'bad',
-            repeat: 2,
-            setXY: { x: 12, y: 0, stepX: 150 }
-        });
-
-        // Colliders and Overlaps
-        this.physics.add.collider(player, eggs, collectEgg, null, this);
-        this.physics.add.collider(player, bads, hitBad, null, this);
-    }
-
-    update() {
-        // Update logic here (similar to previous `update` function)
-        if (gameOver) {
-            this.scene.start('WelcomeScreen');
+    function spawnItems() {
+        for (let i = 0; i < 20; i++) {
+            let eggType = eggTypes[Math.floor(Math.random() * eggTypes.length)];
+            eggs.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                width: 20,
+                height: 20,
+                points: eggType.points
+            });
+        }
+        for (let i = 0; i < 5; i++) {
+            bads.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                width: 30,
+                height: 30
+            });
         }
     }
 
-    generateEggs() {
-        eggs = this.physics.add.group();
-        const totalEggs = 20; // Total eggs to spawn
-        for (let i = 0; i < totalEggs; i++) {
-            const x = Phaser.Math.Between(0, 800);
-            const y = Phaser.Math.Between(0, 600);
-            let eggType = 'egg1'; // Default egg type
-            const rand = Math.random();
-            if (rand < 0.1) {
-                eggType = 'egg3'; // 10% chance
-            } else if (rand < 0.3) {
-                eggType = 'egg2'; // 20% chance
+    function gameLoop() {
+        if (!gameRunning) return;
+        requestAnimationFrame(gameLoop);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Update player
+        player.dy += gravity;
+        player.y += player.dy;
+        if (player.y + player.height > canvas.height) {
+            player.y = canvas.height - player.height;
+            player.dy = 0;
+        }
+
+        // Draw player
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+
+        // Handle eggs and bads
+        handleItems(eggs, 'yellow', (egg) => {
+            score += egg.points;
+            showMessage(`+${egg.points} points!`);
+        });
+        handleItems(bads, 'red', () => {
+            lives -= 1;
+            showMessage('Oh No! You lost a life');
+            if (lives <= 0) {
+                gameOver();
             }
-            eggs.create(x, y, eggType);
+        });
+
+        // Display score and lives
+        ctx.fillStyle = 'black';
+        ctx.font = '20px Arial';
+        ctx.fillText(`Score: ${score}`, 10, 30);
+        ctx.fillText(`Lives: ${lives}`, 10, 60);
+    }
+
+    function handleItems(items, color, collisionCallback) {
+        for (let i = items.length - 1; i >= 0; i--) {
+            const item = items[i];
+            ctx.fillStyle = color;
+            ctx.fillRect(item.x, item.y, item.width, item.height);
+            if (checkCollision(player, item)) {
+                collisionCallback(item);
+                items.splice(i, 1);
+            }
         }
     }
-}
 
-// Game configuration with scenes
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 300 },
-            debug: false
+    function checkCollision(rect1, rect2) {
+        return rect1.x < rect2.x + rect2.width &&
+               rect1.x + rect1.width > rect2.x &&
+               rect1.y < rect2.y + rect2.height &&
+               rect1.height + rect1.y > rect2.y;
+    }
+
+    function showMessage(message) {
+        clearTimeout(messageTimeout);
+        document.getElementById('message').textContent = message;
+        messageTimeout = setTimeout(() => {
+            document.getElementById('message').textContent = '';
+        }, 3000);
+    }
+
+    function gameOver() {
+        gameRunning = false;
+        showMessage('Game Over!! :-(');
+        setTimeout(() => {
+            document.getElementById('welcomeScreen').style.display = 'block';
+            canvas.style.display = 'none';
+        }, 3000);
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp') {
+            player.dy = lift;
         }
-    },
-    scene: [WelcomeScreen, MainGame]
-};
+    });
 
-const game = new Phaser.Game(config);
-
-function collectEgg(player, egg) {
-    egg.disableBody(true, true);
-    let scoreIncrement = 100;
-    if (egg.texture.key === 'egg2') {
-        scoreIncrement = 200; // Assuming egg2 is worth 200 points
-    } else if (egg.texture.key === 'egg3') {
-        scoreIncrement = 500;
-    }
-    score += scoreIncrement;
-    scoreText.setText('Score: ' + score);
-}
-
-function hitBad(player, bad) {
-    bad.disableBody(true, true);
-    lives -= 1;
-    livesText.setText('Lives: ' + lives);
-
-    if (lives <= 0) {
-        gameOver = true;
-        // Add game over logic or message here
-    }
-}
+    document.getElementById('startButton').addEventListener('click', startGame);
+});
