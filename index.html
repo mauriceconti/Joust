@@ -1,23 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Yoga Joust</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #000;
+            text-align: center;
+            font-family: Arial, sans-serif;
         }
-        canvas {
-            border: 1px solid #fff;
+        #gameCanvas {
+            background-color: #87CEEB; /* Light sky blue background */
+            width: 800px;
+            height: 600px;
+            margin: 20px auto;
+            position: relative;
+            display: none; /* Initially hidden */
         }
+        .egg, .bad, .player {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+        }
+        .egg { background-color: yellow; }
+        .bad { background-color: red; }
+        .player { background-color: green; }
     </style>
 </head>
 <body>
+    <div id="welcomeScreen">
+        <h2>Welcome to Yoga Joust!</h2>
+        <p>A game made by Maurice and a GPT</p>
+        <p>Gobble up the Yolos. Don’t touch the couches!</p>
+        <p>Good Luck!</p>
+        <button id="startButton">Start</button>
+    </div>
+    <div id="gameCanvas">
+        <!-- Game entities will be dynamically inserted here -->
+    </div>
     <script src="game.js"></script>
 </body>
 </html>
