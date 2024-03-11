@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         drawScoreAndLives();
 
         if (score % 1000 === 0 && score !== 0) {
-            gameSpeed += 0.1;
+            gameSpeed += 0.02;
         }
 
         requestAnimationFrame(gameLoop);
