@@ -14,7 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const imageSources = {
             sky: 'https://github.com/mauriceconti/Joust/raw/main/sky.png',
             player: 'https://github.com/mauriceconti/Joust/raw/main/bird.png',
-            egg1: 'https://github.com/mauriceconti/Joust/raw/main/egg.png', // Example path, adjust as necessary
+            egg1: 'https://github.com/mauriceconti/Joust/raw/main/egg.png', 
+            egg2: 'https://github.com/mauriceconti/Joust/raw/main/egg2.png',
+            egg3: 'https://github.com/mauriceconti/Joust/raw/main/egg3.png',
+            startButton: 'https://github.com/mauriceconti/Joust/raw/main/startButton.png',// Example path, adjust as necessary
             bad: 'https://github.com/mauriceconti/Joust/raw/main/bad.png' // Example path, adjust as necessary
             // Add paths for egg2, egg3, etc.
         };
