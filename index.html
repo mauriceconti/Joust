@@ -9,94 +9,46 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            display: block;
-            width: 100%;
-            height: 100%;
         }
-
-        .startup-screen {
+        #startScreen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: #ffffff; /* Change to your desired background color */
+            flex-direction: column;
         }
-
-        .startup-screen img {
-            max-width: 80%;
+        #startScreen img {
+            width: 100px;
+            height: auto;
             margin-bottom: 20px;
+        }
+        #startScreen p {
+            color: white;
+            font-size: 20px;
+            text-align: center;
+        }
+        #startScreen button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="startup-screen">
-        <img src="bird.png" alt="Bird Image"> <!-- Replace with the path to your bird image -->
-        <p>Welcome to AI Joust, made by Maurice + GPT.</p>
-        <p>Tap the screen on your mobile device, or the "Up" arrow on your keyboard to fly.</p>
-        <p>Gobble up yogos. Don't get killed by the monsters. Good luck!</p>
+    <canvas id="gameCanvas"></canvas>
+    <div id="startScreen">
+        <img src="bird.png" alt="bird">
+        <p>Welcome to AI Joust, madeth by Maurice + GPT.<br>Tap the screen on your mobile device, or the "Up" arrow on your keyboard to fly.<br>Gobble up yogos. Don't get killed by the monsters. Good luck!</p>
         <button onclick="startGame()">Start</button>
     </div>
-
-    <canvas id="gameCanvas" style="display: none;"></canvas>
-
-    <script>
-        // Initialize canvas and context
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-
-        // Set canvas dimensions
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Load background image
-        const backgroundImage = new Image();
-        backgroundImage.src = "https://mauriceconti.github.io/Joust/sky.png"; // Update with your GitHub Pages URL
-
-        // Background position
-        let backgroundX = 0;
-
-        // Function to draw background
-        function drawBackground() {
-            ctx.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
-            ctx.drawImage(backgroundImage, backgroundX + canvas.width, 0, canvas.width, canvas.height);
-        }
-
-        // Function to update background position
-        function updateBackground() {
-            backgroundX -= 1; // Adjust scrolling speed if needed
-
-            // Reset background position if it goes out of bounds
-            if (backgroundX <= -canvas.width) {
-                backgroundX = 0;
-            }
-        }
-
-        // Main game loop
-        function gameLoop(timestamp) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw background
-            drawBackground();
-
-            // Update background position
-            updateBackground();
-
-            // Request the next frame
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Start the game loop
-        function startGame() {
-            document.querySelector('.startup-screen').style.display = 'none';
-            canvas.style.display = 'block';
-            requestAnimationFrame(gameLoop);
-        }
-    </script>
+    <script src="game.js"></script>
 </body>
 </html>
-
