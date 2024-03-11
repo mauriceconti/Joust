@@ -11,31 +11,56 @@
             align-items: center;
             height: 100vh;
             flex-direction: column;
+            margin: 0;
+            background-color: #87CEEB;
         }
-        #gameCanvas {
-            display: none; /* Hidden initially */
-            background-color: #87CEEB; /* Light blue background, similar to a sky */
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            display: none;
         }
         #welcomeScreen {
+            position: absolute;
+            width: 800px;
+            height: 600px;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
         }
-        #message {
-            margin-top: 20px;
-            color: red;
+        #startButton {
+            padding: 10px 20px;
             font-size: 20px;
+            cursor: pointer;
+        }
+        #message {
+            position: absolute;
+            bottom: 20px;
+            color: #000;
+            font-size: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 5px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div id="welcomeScreen">
-        <p>Welcome to Yoga Joust!<br>
-        A game made by Maurice and a GPT<br>
-        Gobble up the Yolos. Don’t touch the couches!<br>
-        Good Luck!</p>
-        <button id="startButton">Start</button>
+    <div id="gameContainer">
+        <div id="welcomeScreen">
+            <p>Welcome to Yoga Joust!<br>A game made by Maurice and a GPT<br>Gobble up the Yolos. Don’t touch the couches!<br>Good Luck!</p>
+            <button id="startButton">Start</button>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="message"></div>
     </div>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <div id="message"></div>
     <script src="game.js"></script>
 </body>
 </html>
