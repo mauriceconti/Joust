@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backgroundImage.src = 'https://mauriceconti.github.io/Joust/sky.png';
 
     const player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 };
-    const gravity = 0.25;
+    const gravity = 0.15;
     const lift = -5;
 
     window.addEventListener('resize', resizeCanvas);
@@ -121,22 +121,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function loseLife() {
-        // Flash the screen red
-        flashScreen("red", 300);
-        
-        // Pause for 2 seconds
+ function loseLife() {
+    // Flash the screen red
+    flashScreen("red", 300);
+
+    // Pause for 2 seconds
     setTimeout(() => {
-        
-            // Reset player position
+        // Reset player position
         player.y = canvas.height / 2;
 
-            // Reset game speed
-    gameSpeed = 1; // Reset game speed to its initial value
-        
-            // Restart the game loop
+        // Restart the game loop
         requestAnimationFrame(gameLoop);
     }, 2000); // Pause for 2 seconds (2000 milliseconds)
+}
 
     function gameOver() {
         // Flash the screen red for 3 seconds
