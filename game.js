@@ -1,127 +1,121 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+\// Initialize canvas and context
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-    let score = 0;
-    let lives = 3;
-    let gameSpeed = 1;
-    const eggs = [];
-    const badGuys = [];
-    let lastEggTime = Date.now();
-    let lastBadTime = Date.now();
+// Set canvas dimensions
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    const birdImage = new Image();
-    const eggImage = new Image();
-    const badImage = new Image();
-    const backgroundImage = new Image();
+// Define player properties
+const player = {
+    x: 50,
+    y: canvas.height / 2,
+    width: 50,
+    height: 50,
+};
 
-    birdImage.src = 'https://mauriceconti.github.io/Joust/bird.png';
-    eggImage.src = 'https://mauriceconti.github.io/Joust/egg.png';
-    badImage.src = 'https://mauriceconti.github.io/Joust/bad.png';
-    backgroundImage.src = 'https://mauriceconti.github.io/Joust/sky.png';
+// Define game variables
+let score = 0;
+let lives = 3;
+let gameSpeed = 1;
+let lastEggTime = 0;
+let lastBadTime = 0;
+let backgroundX = 0;
 
-    const player = { x: 100, y: canvas.height / 2, dy: 0, width: 60, height: 45 };
-    const gravity = 0.15;
-    const lift = -5;
+// Load images
+const playerImage = new Image();
+playerImage.src = "bird.png";
 
-    window.addEventListener('resize', resizeCanvas);
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
+const eggImage = new Image();
+eggImage.src = "egg.png";
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "ArrowUp") player.dy = lift;
+const badImage = new Image();
+badImage.src = "bad.png";
+
+// Main game loop
+function gameLoop(timestamp) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw background
+    drawBackground();
+
+    // Update player position
+    updatePlayer();
+
+    // Handle eggs
+    handleEggs();
+
+    // Handle bad guys
+    handleBadGuys();
+
+    // Draw score and lives
+    drawScoreAndLives();
+
+    // Check for collisions
+    eggs.forEach((egg, index) => {
+        egg.x -= 2 * gameSpeed;
+        if (egg.x + egg.width < 0) {
+            eggs.splice(index, 1);
+        }
+        ctx.drawImage(eggImage, egg.x, egg.y, egg.width, egg.height);
+        checkCollision(egg, index);
     });
 
-    canvas.addEventListener('touchstart', () => {
-        player.dy = lift;
+    badGuys.forEach((bad, index) => {
+        bad.x -= 3 * gameSpeed;
+        if (bad.x + bad.width < 0) {
+            badGuys.splice(index, 1);
+        }
+        ctx.drawImage(badImage, bad.x, bad.y, bad.width, bad.height);
+        checkCollision(bad, index);
     });
 
-    function startGame() {
-        document.getElementById('startScreen').style.display = 'none';
-        requestAnimationFrame(gameLoop);
-    }
+    // Update background position
+    backgroundX -= 1 * gameSpeed;
 
-    function gameLoop(timestamp) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBackground();
-        updatePlayer();
-        handleEggs();
-        handleBadGuys();
-        drawScoreAndLives();
+    // Draw the background again at the new position to create a scrolling effect
+    drawBackground();
 
-        if (score % 1000 === 0 && score !== 0) {
-            gameSpeed += 0.02;
-        }
+    // Request the next frame
+    requestAnimationFrame(gameLoop);
+}
 
-        requestAnimationFrame(gameLoop);
-    }
+// Start the game loop
+requestAnimationFrame(gameLoop);
 
-    function updatePlayer() {
-        player.dy += gravity;
-        player.y += player.dy;
-        if (player.y > canvas.height - player.height) {
-            player.y = canvas.height - player.height;
-            player.dy = 0;
-        } else if (player.y < 0) {
-            player.y = 0;
-            player.dy = 0;
-        }
-        ctx.drawImage(birdImage, player.x, player.y, player.width, player.height);
-    }
+// Function to draw background
+function drawBackground() {
+    ctx.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
+    ctx.drawImage(backgroundImage, backgroundX + canvas.width, 0, canvas.width, canvas.height);
+}
 
-    function handleEggs() {
-        if (Date.now() - lastEggTime > 2000 / gameSpeed && eggs.length < 12) {
-            eggs.push({ x: canvas.width, y: Math.random() * (canvas.height - 50), width: 50, height: 50 });
-            lastEggTime = Date.now();
-        }
-        eggs.forEach((egg, index) => {
-            egg.x -= 2 * gameSpeed;
-            if (egg.x + egg.width < 0) {
-                eggs.splice(index, 1);
-            }
-            ctx.drawImage(eggImage, egg.x, egg.y, egg.width, egg.height);
-            checkCollision(egg, index);
-        });
-    }
+// Function to update player position
+function updatePlayer() {
+    // Code to update player position
+}
 
-    function handleBadGuys() {
-        if (Date.now() - lastBadTime > 8000 / gameSpeed && badGuys.length < eggs.length / 4) {
-            badGuys.push({ x: canvas.width, y: Math.random() * (canvas.height - 60), width: 60, height: 60 });
-            lastBadTime = Date.now();
-        }
-        badGuys.forEach((bad, index) => {
-            bad.x -= 3 * gameSpeed;
-            if (bad.x + bad.width < 0) {
-                badGuys.splice(index, 1);
-            }
-            ctx.drawImage(badImage, bad.x, bad.y, bad.width, bad.height);
-            checkCollision(bad, index);
-        });
-    }
+// Function to handle eggs
+function handleEggs() {
+    // Code to handle eggs
+}
 
-    function checkCollision(object, index) {
-        if (player.x < object.x + object.width && player.x + player.width > object.x &&
-            player.y < object.y + object.height && player.y + player.height > object.y) {
-            if (eggs.includes(object)) {
-                score += 100;
-                eggs.splice(index, 1);
-            } else if (badGuys.includes(object)) {
-                lives -= 1;
-                badGuys.splice(index, 1);
-                if (lives === 0) {
-                    gameOver();
-                } else {
-                    loseLife();
-                }
-            }
-        }
-    }
+// Function to handle bad guys
+function handleBadGuys() {
+    // Code to handle bad guys
+}
 
- function loseLife() {
+// Function to draw score and lives
+function drawScoreAndLives() {
+    // Code to draw score and lives
+}
+
+// Function to check collisions
+function checkCollision(object, index) {
+    // Code to check collision with player
+}
+
+// Function to handle losing a life
+function loseLife() {
     // Flash the screen red
     flashScreen("red", 300);
 
@@ -130,39 +124,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset player position
         player.y = canvas.height / 2;
 
+        // Reset game speed
+        gameSpeed = 1; // Reset game speed to its initial value
+
         // Restart the game loop
         requestAnimationFrame(gameLoop);
     }, 2000); // Pause for 2 seconds (2000 milliseconds)
 }
 
-    function gameOver() {
-        // Flash the screen red for 3 seconds
-        flashScreen("red", 3000);
-
-        // Show "Game Over" message after 3 seconds
-        setTimeout(() => {
-            alert("Game Over!!");
-            document.location.reload();
-        }, 3000);
-    }
-
-    function flashScreen(color, duration) {
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        setTimeout(() => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }, duration);
-    }
-
-    function drawBackground() {
-        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-    }
-
-    function drawScoreAndLives() {
-        ctx.font = "16px Futura";
-        ctx.fillStyle = "white";
-        ctx.fillText(`Score: ${score} | Lives: ${lives}`, 10, 20);
-    }
-
-    window.startGame = startGame;
-});
+// Function to flash the screen
+function flashScreen(color, duration) {
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    setTimeout(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }, duration);
+}
