@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const badImage = new Image();
     const backgroundImage = new Image();
 
+    birdImage.onload = () => {
+        startGame();
+    };
     birdImage.src = 'https://mauriceconti.github.io/Joust/bird.png';
     eggImage.src = 'https://mauriceconti.github.io/Joust/egg.png';
     badImage.src = 'https://mauriceconti.github.io/Joust/bad.png';
@@ -160,6 +163,4 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillStyle = "white";
         ctx.fillText(`Score: ${score} | Lives: ${lives}`, 10, 20);
     }
-
-    window.startGame = startGame;
 });
