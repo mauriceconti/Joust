@@ -113,11 +113,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 lives -= 1;
                 badGuys.splice(index, 1);
                 if (lives === 0) {
-                    alert("Game Over!!");
-                    document.location.reload();
+                    gameOver();
+                } else {
+                    loseLife();
                 }
             }
         }
+    }
+
+    function loseLife() {
+        // Flash the screen red
+        flashScreen("red", 300);
+
+        // Reset player position
+        player.y = canvas.height / 2;
+
+        // Restart the game loop
+        requestAnimationFrame(gameLoop);
+    }
+
+    function gameOver() {
+        // Flash the screen red for 3 seconds
+        flashScreen("red", 3000);
+
+        // Show "Game Over" message after 3 seconds
+        setTimeout(() => {
+            alert("Game Over!!");
+            document.location.reload();
+        }, 3000);
+    }
+
+    function flashScreen(color, duration) {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        setTimeout(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }, duration);
     }
 
     function drawBackground() {
