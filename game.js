@@ -1,83 +1,102 @@
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    const startButton = document.getElementById('startButton');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const messageDiv = document.getElementById('message');
     canvas.width = 800;
     canvas.height = 600;
 
     let gameRunning = false;
-    let backgroundX = 0;
-    const backgroundSpeed = 1;
-    const images = {};
+    let assetsLoaded = false;
+    let assets = {};
+    let player, eggs, bads, background;
+    let score = 0;
+    let lives = 3;
+    const gravity = 0.5;
+    const lift = -10;
 
-    // Preload images
-    function preloadImages(callback) {
-        const imageSources = {
+    // Load assets
+    function loadAssets(callback) {
+        const assetSources = {
             sky: 'https://github.com/mauriceconti/Joust/raw/main/sky.png',
-            player: 'https://github.com/mauriceconti/Joust/raw/main/bird.png',
-            egg1: 'https://github.com/mauriceconti/Joust/raw/main/egg.png', 
+            bird: 'https://github.com/mauriceconti/Joust/raw/main/bird.png',
+            egg1: 'https://github.com/mauriceconti/Joust/raw/main/egg1.png',
             egg2: 'https://github.com/mauriceconti/Joust/raw/main/egg2.png',
             egg3: 'https://github.com/mauriceconti/Joust/raw/main/egg3.png',
-            startButton: 'https://github.com/mauriceconti/Joust/raw/main/startButton.png',// Example path, adjust as necessary
-            bad: 'https://github.com/mauriceconti/Joust/raw/main/bad.png' // Example path, adjust as necessary
-            // Add paths for egg2, egg3, etc.
+            bad: 'https://github.com/mauriceconti/Joust/raw/main/bad.png',
         };
+        let assetsLoaded = 0;
+        let totalAssets = Object.keys(assetSources).length;
 
-        let loadedImagesCount = 0;
-        const numOfImages = Object.keys(imageSources).length;
-
-        for (let key in imageSources) {
-            images[key] = new Image();
-            images[key].onload = () => {
-                if (++loadedImagesCount >= numOfImages) {
-                    callback(); // All images loaded
+        Object.keys(assetSources).forEach((key) => {
+            assets[key] = new Image();
+            assets[key].src = assetSources[key];
+            assets[key].onload = () => {
+                assetsLoaded++;
+                if (assetsLoaded === totalAssets) {
+                    callback();
                 }
             };
-            images[key].src = imageSources[key];
-        }
+        });
     }
 
-    let player = { x: 100, y: 200, width: 40, height: 40, dy: 0 };
-    const gravity = 0.25;
-    const lift = -6;
+    function initGame() {
+        assetsLoaded = true;
+        background = { x: 0, speed: 2, img: assets.sky };
+        player = { x: 100, y: 200, width: 50, height: 50, dy: 0, img: assets.bird };
+        eggs = []; // Initialize eggs array
+        bads = []; // Initialize bads array
+        // Populate eggs and bads arrays with objects
+        // Each object should have properties x, y, width, height, and img (pointing to the corresponding image in the assets object)
 
-    function startGame() {
-        document.getElementById('welcomeScreen').style.display = 'none';
-        canvas.style.display = 'block';
-        gameRunning = true;
+        // Start the game loop
         gameLoop();
     }
 
     function gameLoop() {
         if (!gameRunning) return;
+
         requestAnimationFrame(gameLoop);
-
-        // Scrolling background
-        backgroundX -= backgroundSpeed;
-        if (backgroundX <= -canvas.width) {
-            backgroundX = 0;
-        }
-        ctx.drawImage(images['sky'], backgroundX, 0, canvas.width, canvas.height);
-        ctx.drawImage(images['sky'], backgroundX + canvas.width, 0, canvas.width, canvas.height);
-
-        // Update and draw player
-        player.dy += gravity;
-        player.y += player.dy;
-        if (player.y + player.height > canvas.height) {
-            player.y = canvas.height - player.height;
-            player.dy = 0;
-        }
-        ctx.drawImage(images['player'], player.x, player.y, player.width, player.height);
-
-        // Placeholder for items and enemies handling
+        updateGame();
+        renderGame();
     }
 
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowUp') {
-            player.dy = lift;
-        }
-    });
+    function updateGame() {
+        // Update game objects
+        // This includes moving the background, applying gravity to the player,
+        // checking for collisions, and updating scores and lives as necessary
+    }
 
-    document.getElementById('startButton').addEventListener('click', () => {
-        preloadImages(startGame); // Preload images then start the game
+    function renderGame() {
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the scrolling background
+        ctx.drawImage(assets.sky, background.x, 0, canvas.width, canvas.height);
+        ctx.drawImage(assets.sky, background.x + canvas.width, 0, canvas.width, canvas.height);
+
+        // Draw the player
+        ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
+
+        // Draw eggs and bads
+        eggs.forEach(egg => {
+            ctx.drawImage(egg.img, egg.x, egg.y, egg.width, egg.height);
+        });
+        bads.forEach(bad => {
+            ctx.drawImage(bad.img, bad.x, bad.y, bad.width, bad.height);
+        });
+
+        // Update and display scores and lives
+        messageDiv.innerText = `Score: ${score} | Lives: ${lives}`;
+    }
+
+    startButton.addEventListener('click', () => {
+        if (!assetsLoaded) {
+            loadAssets(initGame);
+        }
+        welcomeScreen.style.display = 'none';
+        canvas.style.display = 'block';
+        gameRunning = true;
     });
 });
